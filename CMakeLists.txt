@@ -22,5 +22,4 @@ set(TARGET ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME})
 add_executable(${TARGET} main.cpp)
 
 target_link_libraries(${TARGET}
-    SDL2::SDL2
-    SDL2::SDL2main)
+    ${SDL2_LIBRARIES})
