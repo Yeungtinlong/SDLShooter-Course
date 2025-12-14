@@ -1,6 +1,6 @@
 #include "Game.h"
 #include "SceneMain.h"
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 
 Game::Game()
 {
