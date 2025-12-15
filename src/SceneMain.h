@@ -31,6 +31,8 @@ public:
     void updateEnemyProjectiles(float deltaTime);
     void renderEnemyProjectiles();
     void enemyExplode(Enemy *enemy);
+    void updateExplosions(float deltaTime);
+    void renderExplosions();
 
     SDL_FPoint getDirection(Enemy *enemy);
 
@@ -43,10 +45,12 @@ private:
     ProjectilePlayer projectilePlayerTemplate;
     ProjectileEnemy projectileEnemyTemplate;
     Enemy enemyTemplate;
+    Explosion explosionTemplate;
 
     std::list<ProjectilePlayer *> projectilesPlayer;
     std::list<Enemy *> enemies;
     std::list<ProjectileEnemy *> projectilesEnemy;
+    std::list<Explosion *> explosions;
 };
 
 #endif

@@ -63,6 +63,17 @@ void SceneMain::init()
     }
     enemyTemplate.width /= 4;
     enemyTemplate.height /= 4;
+
+    // 初始化爆炸模板
+    explosionTemplate.texture = IMG_LoadTexture(game.getRenderer(), "assets/effect/explosion.png");
+    if (SDL_QueryTexture(explosionTemplate.texture, nullptr, nullptr, &explosionTemplate.width, &explosionTemplate.height) != 0)
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_QueryTexture Error: %s\n", SDL_GetError());
+        return;
+    }
+    explosionTemplate.totalFrame = explosionTemplate.width / explosionTemplate.height;
+    explosionTemplate.width = explosionTemplate.height;
+    SDL_Log("total frame: %d, width: %d, height: %d\n", explosionTemplate.totalFrame, explosionTemplate.width, explosionTemplate.height);
 }
 
 void SceneMain::handleEvent(SDL_Event *event)
@@ -76,6 +87,7 @@ void SceneMain::update(float deltaTime)
     updateEnemies(deltaTime);
     updatePlayerProjectiles(deltaTime);
     updateEnemyProjectiles(deltaTime);
+    updateExplosions(deltaTime);
     spawnEnemy();
 }
 
@@ -99,6 +111,8 @@ void SceneMain::render()
     }
     // 渲染敌机
     renderEnemies();
+    // 渲染爆炸
+    renderExplosions();
 }
 
 void SceneMain::clean()
@@ -132,6 +146,15 @@ void SceneMain::clean()
         }
     }
     enemies.clear();
+    // 清理爆炸
+    for (auto explosion : explosions)
+    {
+        if (explosion != nullptr)
+        {
+            delete explosion;
+        }
+    }
+    explosions.clear();
 
     // 清理玩家
     if (player.texture != nullptr)
@@ -274,6 +297,23 @@ void SceneMain::updatePlayer(float deltaTime)
     {
         // TODO: Game over
         isDead = true;
+        Explosion *explosion = new Explosion(explosionTemplate);
+        explosion->position.x = player.position.x + player.width / 2 - explosion->width / 2;
+        explosion->position.y = player.position.y + player.height / 2 - explosion->height / 2;
+        explosion->startTime = SDL_GetTicks();
+        explosions.push_back(explosion);
+        return;
+    }
+    SDL_Rect playerRect = {static_cast<int>(player.position.x), static_cast<int>(player.position.y), player.width, player.height};
+    for (auto it = enemies.begin(); it != enemies.end(); it++)
+    {
+        auto *enemy = *it;
+        SDL_Rect enemyRect = {static_cast<int>(enemy->position.x), static_cast<int>(enemy->position.y), enemy->width, enemy->height};
+        if (SDL_HasIntersection(&playerRect, &enemyRect))
+        {
+            enemy->currentHealth = 0;
+            player.currentHealth--;
+        }
     }
 }
 
@@ -369,7 +409,45 @@ void SceneMain::renderEnemyProjectiles()
 
 void SceneMain::enemyExplode(Enemy *enemy)
 {
+    Explosion *explosion = new Explosion(explosionTemplate);
+    explosion->position.x = enemy->position.x + enemy->width / 2 - explosion->width / 2;
+    explosion->position.y = enemy->position.y + enemy->height / 2 - explosion->height / 2;
+    explosion->startTime = SDL_GetTicks();
+    explosions.push_back(explosion);
     delete enemy;
+}
+
+void SceneMain::updateExplosions(float)
+{
+    auto currentTime = SDL_GetTicks();
+    for (auto it = explosions.begin(); it != explosions.end();)
+    {
+        Explosion *explosion = *it;
+        explosion->currentFrame = (currentTime - explosion->startTime) * explosion->fps / 1000.0f;
+        if (explosion->currentFrame > explosion->totalFrame)
+        {
+            delete explosion;
+            it = explosions.erase(it);
+        }
+        else
+        {
+            SDL_Log("currentFrame: %d", explosion->currentFrame);
+            it++;
+        }
+    }
+}
+
+void SceneMain::renderExplosions()
+{
+    for (const Explosion *explosion : explosions)
+    {
+        SDL_Rect srcRect = {explosion->width * explosion->currentFrame, 0, explosion->width, explosion->height};
+        SDL_Rect dstRect = {static_cast<int>(explosion->position.x), static_cast<int>(explosion->position.y), explosion->width, explosion->height};
+        if (SDL_RenderCopy(game.getRenderer(), explosion->texture, &srcRect, &dstRect) != 0)
+        {
+            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_RenderCopy Error: %s\n", SDL_GetError());
+        }
+    }
 }
 
 SDL_FPoint SceneMain::getDirection(Enemy *enemy)
