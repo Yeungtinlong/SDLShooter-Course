@@ -102,6 +102,9 @@ void Game::init()
     {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_QueryTexture Error: %s\n", SDL_GetError());
     }
+    nearStars.width /= 2;
+    nearStars.height /= 2;
+
     farStars.texture = IMG_LoadTexture(getRenderer(), "assets/image/Stars-B.png");
     if (farStars.texture == nullptr)
     {
@@ -112,6 +115,8 @@ void Game::init()
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_QueryTexture Error: %s\n", SDL_GetError());
     }
     farStars.speed = 20.0f;
+    farStars.width /= 2;
+    farStars.height /= 2;
 
     currentScene = new SceneMain();
     currentScene->init();
