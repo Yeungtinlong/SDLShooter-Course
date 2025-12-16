@@ -4,6 +4,13 @@
 // #include "Scene.h"
 #include <SDL.h>
 
+enum class ItemType
+{
+    Life,
+    Shield,
+    Time,
+};
+
 struct Player
 {
     SDL_Texture *texture = nullptr;
@@ -12,6 +19,7 @@ struct Player
     int height = 0;
     int moveSpeed = 300;
     int currentHealth = 3;
+    int maxHealth = 3;
     Uint32 cooldown = 300;
     Uint32 lastShootTime = 0;
 };
@@ -59,6 +67,18 @@ struct Explosion
     int totalFrame = 0;
     Uint32 startTime = 0;
     Uint32 fps = 6;
+};
+
+struct Item
+{
+    SDL_Texture *texture = nullptr;
+    SDL_FPoint position = {0, 0};
+    SDL_FPoint direction = {0, 0};
+    int width = 0;
+    int height = 0;
+    float speed = 200;
+    int bounceCount = 3;
+    ItemType type = ItemType::Life;
 };
 
 #endif

@@ -21,18 +21,27 @@ public:
 
     void keyboardControl(float deltaTime);
     void shootPlayer();
-    void shootEnemy(Enemy *enemy);
-    void updatePlayerProjectiles(float deltaTime);
-    void renderPlayerProjectiles();
     void spawnEnemy();
+    void shootEnemy(Enemy *enemy);
+    void enemyExplode(Enemy *enemy);
+    void dropItem(Enemy *enemy);
+    void playerGetItem(Item* item);
+
+    // update
+    void updatePlayerProjectiles(float deltaTime);
     void updatePlayer(float deltaTime);
     void updateEnemies(float deltaTime);
-    void renderEnemies();
     void updateEnemyProjectiles(float deltaTime);
-    void renderEnemyProjectiles();
-    void enemyExplode(Enemy *enemy);
     void updateExplosions(float deltaTime);
+    void updateItems(float deltaTime);
+    
+    // render
+    void renderPlayer();
+    void renderEnemies();
+    void renderPlayerProjectiles();
+    void renderEnemyProjectiles();
     void renderExplosions();
+    void renderItems();
 
     SDL_FPoint getDirection(Enemy *enemy);
 
@@ -46,11 +55,13 @@ private:
     ProjectileEnemy projectileEnemyTemplate;
     Enemy enemyTemplate;
     Explosion explosionTemplate;
+    Item itemLifeTemplate;
 
     std::list<ProjectilePlayer *> projectilesPlayer;
     std::list<Enemy *> enemies;
     std::list<ProjectileEnemy *> projectilesEnemy;
     std::list<Explosion *> explosions;
+    std::list<Item *> items;
 };
 
 #endif
