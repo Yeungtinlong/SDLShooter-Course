@@ -5,7 +5,9 @@
 #include "Object.h"
 #include "Game.h"
 #include <list>
+#include <map>
 #include <random>
+#include <SDL_mixer.h>
 
 class SceneMain : public Scene
 {
@@ -13,6 +15,7 @@ public:
     SceneMain();
     ~SceneMain();
 
+    // 生命周期函数
     void init() override;
     void handleEvent(SDL_Event *event) override;
     void update(float deltaTime) override;
@@ -20,6 +23,8 @@ public:
     void clean() override;
 
     void keyboardControl(float deltaTime);
+
+    // gameplay
     void shootPlayer();
     void spawnEnemy();
     void shootEnemy(Enemy *enemy);
@@ -49,19 +54,21 @@ private:
     std::mt19937 gen;
     std::uniform_real_distribution<float> dis;
     Game &game;
-    Player player;
-    bool isDead;
-    ProjectilePlayer projectilePlayerTemplate;
-    ProjectileEnemy projectileEnemyTemplate;
-    Enemy enemyTemplate;
-    Explosion explosionTemplate;
-    Item itemLifeTemplate;
-
+    Player player{};
+    bool isDead = false;
+    ProjectilePlayer projectilePlayerTemplate{};
+    ProjectileEnemy projectileEnemyTemplate{};
+    Enemy enemyTemplate{};
+    Explosion explosionTemplate{};
+    Item itemLifeTemplate{};
+    Mix_Music *bgm = nullptr;
+    
     std::list<ProjectilePlayer *> projectilesPlayer;
     std::list<Enemy *> enemies;
     std::list<ProjectileEnemy *> projectilesEnemy;
     std::list<Explosion *> explosions;
     std::list<Item *> items;
+    std::map<std::string, Mix_Chunk*> sounds;
 };
 
 #endif

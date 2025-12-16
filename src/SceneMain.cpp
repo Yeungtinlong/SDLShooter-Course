@@ -14,6 +14,22 @@ SceneMain::~SceneMain()
 
 void SceneMain::init()
 {
+    // 加载背景音乐
+    bgm = Mix_LoadMUS("assets/music/03_Racing_Through_Asteroids_Loop.ogg");
+    if (bgm == nullptr)
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Mix_LoadMUS Error: %s\n", SDL_GetError());
+    }
+    Mix_PlayMusic(bgm, -1);
+
+    // 读取音效资源
+    sounds["player_shoot"] = Mix_LoadWAV("assets/sound/laser_shoot4.wav");
+    sounds["enemy_shoot"] = Mix_LoadWAV("assets/sound/xs_laser.wav");
+    sounds["player_explode"] = Mix_LoadWAV("assets/sound/explosion1.wav");
+    sounds["enemy_explode"] = Mix_LoadWAV("assets/sound/explosion3.wav");
+    sounds["hit"] = Mix_LoadWAV("assets/sound/eff11.wav");
+    sounds["get_item"] = Mix_LoadWAV("assets/sound/eff5.wav");
+
     // 初始化随机数生成器
     std::random_device rd;
     gen = std::mt19937{rd()};
@@ -112,9 +128,6 @@ void SceneMain::update(float deltaTime)
 
 void SceneMain::render()
 {
-    // 清理渲染器
-    SDL_RenderClear(game.getRenderer());
-
     // 渲染玩家子弹
     renderPlayerProjectiles();
     // 渲染敌机子弹
@@ -180,6 +193,16 @@ void SceneMain::clean()
     }
     items.clear();
 
+    // 清理音效
+    for (auto sound : sounds)
+    {
+        if (sound.second != nullptr)
+        {
+            Mix_FreeChunk(sound.second);
+        }
+    }
+    sounds.clear();
+
     // 清理玩家
     if (player.texture != nullptr)
     {
@@ -208,6 +231,12 @@ void SceneMain::clean()
     if (itemLifeTemplate.texture != nullptr)
     {
         SDL_DestroyTexture(itemLifeTemplate.texture);
+    }
+
+    if (bgm != nullptr)
+    {
+        Mix_HaltMusic();
+        Mix_FreeMusic(bgm);
     }
 }
 
@@ -287,6 +316,7 @@ void SceneMain::updatePlayerProjectiles(float deltaTime)
                     delete projectile;
                     it = projectilesPlayer.erase(it);
                     hit = true;
+                    Mix_PlayChannel(-1, sounds["hit"], 0);
                     break;
                 }
             }
@@ -332,6 +362,7 @@ void SceneMain::updatePlayer(float deltaTime)
         explosion->position.y = player.position.y + player.height / 2 - explosion->height / 2;
         explosion->startTime = SDL_GetTicks();
         explosions.push_back(explosion);
+        Mix_PlayChannel(-1, sounds["player_explode"], 0);
         return;
     }
     SDL_Rect playerRect = {static_cast<int>(player.position.x), static_cast<int>(player.position.y), player.width, player.height};
@@ -427,6 +458,7 @@ void SceneMain::updateEnemyProjectiles(float deltaTime)
                 player.currentHealth -= projectile->damage;
                 delete projectile;
                 it = projectilesEnemy.erase(it);
+                Mix_PlayChannel(-1, sounds["hit"], 0);
                 break;
             }
             else
@@ -462,6 +494,8 @@ void SceneMain::enemyExplode(Enemy *enemy)
         dropItem(enemy);
     }
     delete enemy;
+
+    Mix_PlayChannel(-1, sounds["enemy_explode"], 0);
 }
 
 void SceneMain::updateExplosions(float)
@@ -521,9 +555,10 @@ void SceneMain::updateItems(float deltaTime)
         }
         else
         {
+            // 判断玩家拾取物品
             SDL_Rect itemRect{static_cast<int>(item->position.x), static_cast<int>(item->position.y), item->width, item->height};
             SDL_Rect playerRect{static_cast<int>(player.position.x), static_cast<int>(player.position.y), player.width, player.height};
-            if (SDL_HasIntersection(&itemRect, &playerRect))
+            if (!isDead && SDL_HasIntersection(&itemRect, &playerRect))
             {
                 playerGetItem(item);
                 it = items.erase(it);
@@ -584,6 +619,8 @@ void SceneMain::playerGetItem(Item *item)
             player.currentHealth = player.maxHealth;
         }
     }
+
+    Mix_PlayChannel(-1, sounds["get_item"], 0);
 }
 
 SDL_FPoint SceneMain::getDirection(Enemy *enemy)
@@ -602,7 +639,7 @@ void SceneMain::shootPlayer()
     projectile->position.x = player.position.x + player.width / 2 - projectile->width / 2;
     projectile->position.y = player.position.y;
     projectilesPlayer.push_back(projectile);
-
+    Mix_PlayChannel(0, sounds["player_shoot"], 0);
     // SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Player shoot!");
 }
 
@@ -614,4 +651,5 @@ void SceneMain::shootEnemy(Enemy *enemy)
 
     projectile->direction = getDirection(enemy);
     projectilesEnemy.push_back(projectile);
+    Mix_PlayChannel(-1, sounds["enemy_shoot"], 0);
 }
