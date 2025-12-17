@@ -92,6 +92,13 @@ void Game::init()
     Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
     Mix_Volume(-1, MIX_MAX_VOLUME / 8);
 
+    // SDL_ttf初始化
+    if (TTF_Init() != 0)
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "TTF_Init Error: %s\n", SDL_GetError());
+        isRunning = false;
+    }
+
     // 初始化背景
     nearStars.texture = IMG_LoadTexture(getRenderer(), "assets/image/Stars-A.png");
     if (nearStars.texture == nullptr)
@@ -138,11 +145,15 @@ void Game::clean()
         SDL_DestroyTexture(farStars.texture);
     }
 
+    // 清理SDL_image
     IMG_Quit();
 
     // 清理SDL_mixer
     Mix_CloseAudio();
     Mix_Quit();
+
+    // 清理SDL_ttf
+    TTF_Quit();
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
