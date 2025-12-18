@@ -1,4 +1,5 @@
 #include "SceneTitle.h"
+#include "SceneMain.h"
 
 SceneTitle::SceneTitle()
 {
@@ -20,18 +21,28 @@ void SceneTitle::init()
 
 void SceneTitle::handleEvent(SDL_Event* event)
 {
+    if (event->type == SDL_KEYDOWN) {
+        if (event->key.keysym.scancode == SDL_SCANCODE_J) {
+            game.changeScene(new SceneMain());
+        }
+    }
 }
 
 void SceneTitle::update(float deltaTime)
 {
+    timer += deltaTime;
+    if (timer > 1.0f)
+        timer = 0.0f;
 }
 
 void SceneTitle::render()
 {
     // 渲染标题文字
     game.renderTextCentered("太空战机", 0.4f, true);
-    // 渲染
-    game.renderTextCentered("按 J 键进入游戏", 0.8f, false);
+
+    // 渲染按键 J 进入游戏
+    if (timer < 0.5f)
+        game.renderTextCentered("按 J 键进入游戏", 0.8f, false);
 }
 
 void SceneTitle::clean()

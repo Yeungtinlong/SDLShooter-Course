@@ -1,4 +1,5 @@
 #include "SceneMain.h"
+#include "SceneTitle.h"
 #include "Game.h"
 #include <SDL.h>
 #include <SDL_image.h>
@@ -107,6 +108,11 @@ void SceneMain::init()
 
 void SceneMain::handleEvent(SDL_Event* event)
 {
+    if (event->type == SDL_KEYDOWN) {
+        if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+            game.changeScene(new SceneTitle());
+        }
+    }
 }
 
 void SceneMain::update(float deltaTime)

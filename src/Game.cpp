@@ -125,7 +125,7 @@ void Game::init()
     farStars.width /= 2;
     farStars.height /= 2;
 
-    currentScene = new SceneMain();
+    currentScene = new SceneTitle();
     currentScene->init();
 }
 
