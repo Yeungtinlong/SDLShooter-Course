@@ -1,5 +1,5 @@
-#ifndef SCENEMAIN_H
-#define SCENEMAIN_H
+#ifndef SCENE_MAIN_H
+#define SCENE_MAIN_H
 
 #include "Game.h"
 #include "Object.h"
@@ -31,7 +31,8 @@ private:
     void enemyExplode(Enemy* enemy);
     void dropItem(Enemy* enemy);
     void playerGetItem(Item* item);
-
+    SDL_FPoint getDirection(Enemy* enemy);
+    
     // update
     void updatePlayerProjectiles(float deltaTime);
     void updatePlayer(float deltaTime);
@@ -39,6 +40,7 @@ private:
     void updateEnemyProjectiles(float deltaTime);
     void updateExplosions(float deltaTime);
     void updateItems(float deltaTime);
+    void changeSceneDelayed(float deltaTime, float delay);
 
     // render
     void renderPlayer();
@@ -49,7 +51,8 @@ private:
     void renderItems();
     void renderUI();
 
-    SDL_FPoint getDirection(Enemy* enemy);
+
+    // others
 
 private:
     std::mt19937 gen;
@@ -63,8 +66,9 @@ private:
     Item itemLifeTemplate {};
     Mix_Music* bgm = nullptr;
     SDL_Texture *uiHealth = nullptr;
-    int score = 0;
     TTF_Font *scoreFont;
+    int score = 0;
+    float timerEnd = 0.0f;
 
     std::list<ProjectilePlayer*> projectilesPlayer;
     std::list<Enemy*> enemies;

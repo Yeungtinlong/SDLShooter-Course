@@ -27,7 +27,14 @@ set(TARGET ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME})
 get_target_property(_inc SDL2::SDL2 INTERFACE_INCLUDE_DIRECTORIES)
 message(STATUS "SDL2 include dirs = ${_inc}")
 
-add_executable(${TARGET} "src/main.cpp" "src/Game.cpp" "src/Scene.cpp" "src/SceneMain.cpp" "src/SceneTitle.cpp")
+add_executable(${TARGET} 
+"src/main.cpp" 
+"src/Game.cpp" 
+"src/Scene.cpp" 
+"src/SceneMain.cpp" 
+"src/SceneTitle.cpp"
+"src/SceneEnd.cpp"
+)
 
 target_link_libraries(${TARGET}
     SDL2::SDL2

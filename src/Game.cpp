@@ -84,8 +84,7 @@ void Game::init()
     Mix_Volume(-1, MIX_MAX_VOLUME / 8);
 
     // SDL_ttf初始化
-    if (TTF_Init() != 0)
-    {
+    if (TTF_Init() != 0) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "TTF_Init Error: %s\n", SDL_GetError());
         isRunning = false;
     }
@@ -174,12 +173,24 @@ void Game::changeScene(Scene* scene)
     currentScene->init();
 }
 
-void Game::renderTextCentered(std::string text, float posY, bool isTitle)
+SDL_Point Game::renderTextCentered(std::string text, float posY, bool isTitle)
 {
     SDL_Color color { 255, 255, 255, 255 };
     SDL_Surface* surface = TTF_RenderUTF8_Solid(isTitle ? titleFont : textFont, text.c_str(), color);
     SDL_Texture* texture = SDL_CreateTextureFromSurface(getRenderer(), surface);
     SDL_Rect dstrect { getWindowWidth() / 2 - surface->w / 2, static_cast<int>((getWindowHeight() - surface->h) * posY), surface->w, surface->h };
+    SDL_RenderCopy(getRenderer(), texture, nullptr, &dstrect);
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+    return SDL_Point { dstrect.x + dstrect.w, dstrect.y };
+}
+
+void Game::renderTextPos(std::string text, int posX, int posY)
+{
+    SDL_Color color { 255, 255, 255, 255 };
+    SDL_Surface* surface = TTF_RenderUTF8_Solid(textFont, text.c_str(), color);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(getRenderer(), surface);
+    SDL_Rect dstrect { posX, posY, surface->w, surface->h };
     SDL_RenderCopy(getRenderer(), texture, nullptr, &dstrect);
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
@@ -249,4 +260,8 @@ void Game::renderBackground()
             }
         }
     }
+}
+
+void Game::insertLeaderBoard(int score, std::string name)
+{
 }

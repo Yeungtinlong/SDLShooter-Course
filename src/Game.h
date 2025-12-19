@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <map>
 #include <string>
 
 class Game {
@@ -26,19 +27,26 @@ public:
     void changeScene(Scene* scene);
 
     // 渲染工具函数
-    void renderTextCentered(std::string text, float posY, bool isTitle);
+    SDL_Point renderTextCentered(std::string text, float posY, bool isTitle);
+    void renderTextPos(std::string text, int posX, int posY);
 
-    // getter
+    // getters
     SDL_Window* getWindow() { return window; }
     SDL_Renderer* getRenderer() { return renderer; }
     int getWindowWidth() { return windowWidth; }
     int getWindowHeight() { return windowHeight; }
-    TTF_Font* getTitleFont() { return titleFont; };
-    TTF_Font* getTextFont() { return textFont; };
+    TTF_Font* getTitleFont() { return titleFont; }
+    TTF_Font* getTextFont() { return textFont; }
+    int getFinalScore() { return finalScore; }
 
+    // setters
+    void setFinalScore(int score) { finalScore = score; }
+
+    // others
 private:
     void backgroundUpdate(float deltaTime);
     void renderBackground();
+    void insertLeaderBoard(int score, std::string name);
 
 private:
     Game();
@@ -55,6 +63,8 @@ private:
     Background farStars {};
     TTF_Font* titleFont;
     TTF_Font* textFont;
+    int finalScore = 0;
+    std::multimap<int, std::string, std::greater<int>> leaderBoard;
 };
 
 #endif
