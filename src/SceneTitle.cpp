@@ -47,4 +47,8 @@ void SceneTitle::render()
 
 void SceneTitle::clean()
 {
+    if (bgm != nullptr) {
+        Mix_HaltMusic();
+        Mix_FreeMusic(bgm);
+    }
 }

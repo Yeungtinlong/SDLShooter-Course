@@ -2,6 +2,7 @@
 #define SCENE_END_H
 
 #include "Scene.h"
+#include <SDL_mixer.h>
 #include <string>
 
 class SceneEnd : public Scene {
@@ -14,7 +15,7 @@ public:
     void update(float deltaTime) override;
     void render() override;
     void clean() override;
-    
+
     void updateUnderlineTimer(float deltaTime);
 
 private:
@@ -26,6 +27,7 @@ private:
     bool isTyping = true;
     std::string name {};
     float underlineTimer = 0.0f;
+    Mix_Music* bgm;
 };
 
 #endif

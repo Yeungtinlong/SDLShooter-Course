@@ -1,9 +1,13 @@
 #include "SceneEnd.h"
 #include "Game.h"
+#include "SceneMain.h"
 #include <string>
 
 void SceneEnd::init()
 {
+    bgm = Mix_LoadMUS("assets/music/06_Battle_in_Space_Intro.ogg");
+    Mix_PlayMusic(bgm, -1);
+
     if (!SDL_IsTextInputActive())
         SDL_StartTextInput();
     if (!SDL_IsTextInputActive()) {
@@ -24,10 +28,15 @@ void SceneEnd::handleEvent(SDL_Event* event)
                 if (name.empty()) {
                     name = "无名氏";
                 }
+                game.insertLeaderBoard(game.getFinalScore(), name);
             }
             if (event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE) {
                 removeLastUTF8Char(name);
             }
+        }
+    } else if (event->type == SDL_KEYDOWN) {
+        if (event->key.keysym.scancode == SDL_SCANCODE_J) {
+            game.changeScene(new SceneMain());
         }
     }
 }
@@ -48,6 +57,10 @@ void SceneEnd::render()
 
 void SceneEnd::clean()
 {
+    if (bgm != nullptr) {
+        Mix_HaltMusic();
+        Mix_FreeMusic(bgm);
+    }
 }
 
 void SceneEnd::updateUnderlineTimer(float deltaTime)
@@ -78,6 +91,22 @@ void SceneEnd::renderPhase1()
 void SceneEnd::renderPhase2()
 {
     game.renderTextCentered("得分榜", 0.1f, true);
+    int i = 1;
+    int offsetY = 50;
+    int startX = 50;
+    int startY = static_cast<int>(game.getWindowHeight() * 0.2f);
+    for (auto item : game.getLeaderBoard()) {
+        std::string name = std::to_string(i) + ". " + item.second;
+        std::string score = std::to_string(item.first);
+        int y = startY + offsetY * i;
+        // 渲染name
+        game.renderTextPos(name, startX, y);
+        // 渲染score
+        game.renderTextPos(score, startX, y, false);
+        i++;
+    }
+    if (underlineTimer > 0.5f)
+        game.renderTextCentered("按 J 键重新开始游戏", 0.8f, false);
 }
 
 void SceneEnd::removeLastUTF8Char(std::string& str)

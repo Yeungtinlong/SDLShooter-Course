@@ -28,7 +28,7 @@ public:
 
     // 渲染工具函数
     SDL_Point renderTextCentered(std::string text, float posY, bool isTitle);
-    void renderTextPos(std::string text, int posX, int posY);
+    void renderTextPos(std::string text, int posX, int posY, bool isLeft = true);
 
     // getters
     SDL_Window* getWindow() { return window; }
@@ -38,15 +38,19 @@ public:
     TTF_Font* getTitleFont() { return titleFont; }
     TTF_Font* getTextFont() { return textFont; }
     int getFinalScore() { return finalScore; }
+    std::multimap<int, std::string, std::greater<int>>& getLeaderBoard() { return leaderBoard; }
 
     // setters
     void setFinalScore(int score) { finalScore = score; }
 
     // others
+    void insertLeaderBoard(int score, std::string name);
+    void saveData();
+    void loadData();
+
 private:
     void backgroundUpdate(float deltaTime);
     void renderBackground();
-    void insertLeaderBoard(int score, std::string name);
 
 private:
     Game();
@@ -56,6 +60,7 @@ private:
     SDL_Renderer* renderer = nullptr;
     int windowWidth = 600;
     int windowHeight = 800;
+    bool isFullscreen = false;
     int fps = 60;
     Uint32 frameTime;
     float deltaTime;

@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
+#include <fstream>
 
 Game::Game()
 {
@@ -17,6 +18,7 @@ Game& Game::getInstance()
 
 Game::~Game()
 {
+    saveData();
     clean();
 }
 
@@ -124,6 +126,8 @@ void Game::init()
     farStars.width /= 2;
     farStars.height /= 2;
 
+    loadData();
+
     currentScene = new SceneTitle();
     currentScene->init();
 }
@@ -185,12 +189,12 @@ SDL_Point Game::renderTextCentered(std::string text, float posY, bool isTitle)
     return SDL_Point { dstrect.x + dstrect.w, dstrect.y };
 }
 
-void Game::renderTextPos(std::string text, int posX, int posY)
+void Game::renderTextPos(std::string text, int posX, int posY, bool isLeft)
 {
     SDL_Color color { 255, 255, 255, 255 };
     SDL_Surface* surface = TTF_RenderUTF8_Solid(textFont, text.c_str(), color);
     SDL_Texture* texture = SDL_CreateTextureFromSurface(getRenderer(), surface);
-    SDL_Rect dstrect { posX, posY, surface->w, surface->h };
+    SDL_Rect dstrect { isLeft ? posX : getWindowWidth() - surface->w - posX, posY, surface->w, surface->h };
     SDL_RenderCopy(getRenderer(), texture, nullptr, &dstrect);
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
@@ -202,6 +206,12 @@ void Game::handleEvent(SDL_Event* event)
     while (SDL_PollEvent(event)) {
         if (event->type == SDL_QUIT) {
             isRunning = false;
+        }
+        if (event->type == SDL_KEYDOWN) {
+            if (event->key.keysym.sym == SDL_SCANCODE_F4) {
+                isFullscreen = !isFullscreen;
+                SDL_SetWindowFullscreen(window, isFullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP);
+            }
         }
         currentScene->handleEvent(event);
     }
@@ -264,4 +274,37 @@ void Game::renderBackground()
 
 void Game::insertLeaderBoard(int score, std::string name)
 {
+    leaderBoard.insert({ score, name });
+    if (leaderBoard.size() > 8) {
+        leaderBoard.erase(--leaderBoard.end());
+    }
+}
+
+void Game::saveData()
+{
+    std::ofstream file("assets/save.dat");
+    if (!file.is_open()) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Open Savefile Error: %s\n", SDL_GetError());
+        return;
+    }
+    for (const auto& entry : leaderBoard) {
+        file << entry.first << " " << entry.second << std::endl;
+    }
+    file.close();
+    SDL_Log("Game saved.");
+}
+
+void Game::loadData()
+{
+    std::ifstream file("assets/save.dat");
+    if (!file.is_open()) {
+        SDL_Log("Failed to open save.dat. \n");
+        return;
+    }
+    leaderBoard.clear();
+    int score;
+    std::string name;
+    while (file >> score >> name) {
+        leaderBoard.insert({ score, name });
+    }
 }
